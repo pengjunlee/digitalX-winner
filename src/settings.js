@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Winner & Purcotton',
+  title: '情报中心',
 
   /**
    * @type {boolean} true | false
