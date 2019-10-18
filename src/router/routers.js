@@ -141,8 +141,8 @@ export const asyncRoutes = [
         hidden: true
       },
       {
-        path: 'https://github.com/PanJiaChen/vue-element-admin',
-        meta: { title: 'External Link', icon: 'link' }
+        path: 'https://www.purcotton.com/',
+        meta: { title: '全棉时代官网', icon: 'link' }
       }
     ]
   },
