@@ -1,8 +1,6 @@
 import Vue from 'vue'
-import Cookies from 'js-cookie'
 
 import 'normalize.css/normalize.css' // a modern alternative to CSS resets
-import locale from 'element-ui/lib/locale/lang/zh-CN' // lang i18n
 
 import Element from 'element-ui'
 import './styles/element-variables.scss'
@@ -31,7 +29,9 @@ if (process.env.NODE_ENV === 'production') {
   mockXHR()
 }
 
-Vue.use(Element, { locale })
+Vue.use(Element, {
+  size: 'medium' // set element-ui default size
+})
 
 // register global utility filters
 Object.keys(filters).forEach(key => {
