@@ -100,7 +100,7 @@ export const asyncRoutes = [
     alwaysShow: true, // will always show the root menu
     name: 'Weapon',
     meta: {
-      title: 'Weapon',
+      title: '开发辅助',
       icon: 'education',
       roles: ['admin'] // you can set roles in root nav
     },
@@ -109,36 +109,19 @@ export const asyncRoutes = [
         path: 'icon',
         component: () => import('@/views/icons/index'),
         name: 'Icons',
-        meta: { title: 'Icons', icon: 'icon', noCache: true }
+        meta: { title: '图标', icon: 'icon', noCache: true }
       },
       {
         path: 'tab',
         component: () => import('@/views/tab/index'),
         name: 'Tab',
-        meta: { title: 'Tab', icon: 'tab' }
-      },
-      {
-        path: 'zip',
-        component: () => import('@/views/zip/index'),
-        name: 'Zip',
-        meta: { title: 'Export Zip', icon: 'zip' }
+        meta: { title: '属性页', icon: 'tab' }
       },
       {
         path: 'clipboard',
         component: () => import('@/views/clipboard/index'),
         name: 'Clipboard',
-        meta: { title: 'Clipboard', icon: 'clipboard' }
-      },
-      {
-        path: 'pdf',
-        component: () => import('@/views/pdf/index'),
-        name: 'PDF',
-        meta: { title: 'PDF', icon: 'pdf' }
-      },
-      {
-        path: 'pdf/download',
-        component: () => import('@/views/pdf/download'),
-        hidden: true
+        meta: { title: '剪切板', icon: 'clipboard' }
       },
       {
         path: 'https://www.purcotton.com/',
@@ -152,8 +135,9 @@ export const asyncRoutes = [
     component: Layout,
     redirect: 'noRedirect',
     name: 'ErrorPages',
+    hidden: true,
     meta: {
-      title: 'Error Pages',
+      title: '错误页面',
       icon: '404'
     },
     children: [
@@ -180,7 +164,7 @@ export const asyncRoutes = [
         path: 'index',
         component: () => import('@/views/theme/index'),
         name: 'Theme',
-        meta: { title: 'Theme', icon: 'theme' }
+        meta: { title: '换肤', icon: 'theme' }
       }
     ]
   },
