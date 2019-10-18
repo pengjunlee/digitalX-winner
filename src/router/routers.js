@@ -112,12 +112,6 @@ export const asyncRoutes = [
         meta: { title: '图标', icon: 'icon', noCache: true }
       },
       {
-        path: 'tab',
-        component: () => import('@/views/tab/index'),
-        name: 'Tab',
-        meta: { title: '属性页', icon: 'tab' }
-      },
-      {
         path: 'clipboard',
         component: () => import('@/views/clipboard/index'),
         name: 'Clipboard',

@@ -32,14 +32,6 @@ const steps = [
     }
   },
   {
-    element: '#size-select',
-    popover: {
-      title: 'Switch Size',
-      description: 'Switch the system size',
-      position: 'left'
-    }
-  },
-  {
     element: '#tags-view-container',
     popover: {
       title: 'Tags view',
