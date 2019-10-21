@@ -1,5 +1,6 @@
 import Vue from 'vue'
-
+import VueParticles from 'vue-particles'
+Vue.use(VueParticles)
 import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 
 import Element from 'element-ui'
