@@ -1,10 +1,11 @@
-import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
-import { router, resetRouter } from '@/router'
+import { login, logout, getInfo, updatePassword } from '@/api/user'
+import { getToken, setToken, removeToken, getName, setName, removeName } from '@/utils/auth'
+import { resetRouter } from '@/router'
 
 const state = {
   token: getToken(),
-  name: '',
+  name: getName(),
+  nickName: '',
   avatar: '',
   introduction: '',
   roles: []
@@ -12,14 +13,19 @@ const state = {
 
 const mutations = {
   SET_TOKEN: (state, token) => {
-    console.log('SET_TOKEN: ' + token)
+    setToken(token)
     state.token = token
   },
   SET_INTRODUCTION: (state, introduction) => {
     state.introduction = introduction
   },
   SET_NAME: (state, name) => {
+    setName(name)
+    console.log('setName : '+name)
     state.name = name
+  },
+  SET_NICKNAME: (state, nickName) => {
+    state.nickName = nickName
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
@@ -36,9 +42,9 @@ const actions = {
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
-        resolve()
+        const { name } = data
+        commit('SET_NAME', name)
+        resolve(data)
       }).catch(error => {
         reject(error)
       })
@@ -48,18 +54,18 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
+      getInfo(state.name).then(response => {
         const { data } = response
         if (!data) {
-          reject('Verification failed, please Login again.')
+          reject('获取用户信息失败，请重新登录')
         }
-        const { roles, name, avatar, introduction } = data
+        const { roles, nickName, avatar, introduction } = data
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
         commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
+        commit('SET_NICKNAME', nickName)
         commit('SET_AVATAR', avatar)
         commit('SET_INTRODUCTION', introduction)
         resolve(data)
@@ -72,11 +78,24 @@ const actions = {
   // user logout
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
-      logout(state.token).then(() => {
+      logout().then(() => {
         commit('SET_TOKEN', '')
+        commit('SET_NAME', '')
         commit('SET_ROLES', [])
         removeToken()
+        removeName()
         resetRouter()
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  // update password
+  updatePassword({ commit }, passwordForm) {
+    return new Promise((resolve, reject) => {
+      updatePassword(passwordForm).then(() => {
         resolve()
       }).catch(error => {
         reject(error)
@@ -88,8 +107,10 @@ const actions = {
   resetToken({ commit }) {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
+      commit('SET_NAME', '')
       commit('SET_ROLES', [])
       removeToken()
+      removeName()
       resolve()
     })
   },
@@ -101,32 +122,8 @@ const actions = {
       setToken(token)
       resolve()
     })
-  },
-
-  // dynamically modify permissions
-  changeRoles({ commit, dispatch }, role) {
-    return new Promise(async resolve => {
-      const token = role + '-token'
-
-      commit('SET_TOKEN', token)
-      setToken(token)
-
-      const { roles } = await dispatch('getInfo')
-
-      resetRouter()
-
-      // generate accessible routes map based on roles
-      const accessRoutes = await dispatch('permission/generateRoutes', roles, { root: true })
-
-      // dynamically add accessible routes
-      router.addRoutes(accessRoutes)
-
-      // reset visited views and cached views
-      dispatch('tagsView/delAllViews', null, { root: true })
-
-      resolve()
-    })
   }
+  
 }
 
 export default {

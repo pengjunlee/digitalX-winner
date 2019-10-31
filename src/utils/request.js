@@ -2,24 +2,21 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+import { authToken } from '@/settings'
 
-// create an axios instance
+// 创建 axios 实例
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  // withCredentials: true, // send cookies when cross-domain requests
+  withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
 })
 
-// request interceptor
+// 请求拦截器
 service.interceptors.request.use(
   config => {
-    // do something before request is sent
-
+    // 如果token存在，请求时带上token
     if (store.getters.token) {
-      // let each request carry token
-      // ['X-Token'] is a custom headers key
-      // please modify it according to the actual situation
-      config.headers['X-Token'] = getToken()
+      config.headers[authToken] = getToken()
     }
 
     // 开发环境下，如果是 post、put、patch 请求,则打印请求体，方便调试
@@ -32,67 +29,62 @@ service.interceptors.request.use(
     return config
   },
   error => {
-    // do something with request error
-    console.log(error) // for debug
+    // 请求异常时打印出异常信息
+    console.log(error)
     return Promise.reject(error)
   }
 )
 
-// response interceptor
+// 响应拦截器
 service.interceptors.response.use(
-  /**
-   * If you want to get http information such as headers or status
-   * Please return  response => response
-  */
 
-  /**
-   * Determine the request status by custom code
-   * Here is just an example
-   * You can also judge the status by HTTP Status Code
-   */
   response => {
+    // 如果需要获取响应的Http状态码或者header信息，请直接返回response
     const res = response.data
-
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000) {
-      Message({
-        message: res.message || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
-
+    console.log(res)
+    /**
+     * 自定义状态码：
+     * 0 表示成功获取到响应；
+     * -1 表示通用获取响应失败；
+     * -2 表示由于鉴权引起的响应失败；
+     * -201 用户名与密码不匹配；
+     */
+    if (res.code !== 0) {
+      
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
-        // to re-login
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
+      if (res.code === -2 || res.code === 401) {
+        // 重新登录
+        MessageBox.confirm('获取用户信息失败，请重新登录', '重新登录', {
+          confirmButtonText: '重新登录',
+          cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           store.dispatch('user/resetToken').then(() => {
             location.reload()
           })
         })
+      } else {
+        Message({
+          message: res.message || '出意外了!^_^!',
+          type: 'error',
+          duration: 3 * 1000
+        })
       }
-      return Promise.reject(new Error(res.message || 'Error'))
+      return Promise.reject(new Error(res.message || '系统错误！'))
     } else {
-      // 开发环境下，模拟添加用户token
+      // 开发环境下，模拟添加用户token，根据测试的角色添加
       if (process.env.NODE_ENV === 'development') {
-        if (store.getters.token) {
-          // let each request carry token
-          // ['X-Token'] is a custom headers key
-          // please modify it according to the actual situation
-          response.headers['X-Token'] = getToken()
-        }
+        response.headers[authToken] = res.token
       }
-      store.dispatch('user/setToken', response.headers['X-Token']).then(() => {
-        console.log('setToken: ' + response.headers['X-Token'])
+      store.dispatch('user/setToken', response.headers[authToken]).then(() => {
+        // console.log('setToken: ' + response.headers[authToken])
       })
       return res
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    // 请求异常时打印出异常信息
+    console.log(error)
     Message({
       message: error.message,
       type: 'error',

@@ -1,5 +1,6 @@
 module.exports = {
   title: '情报中心',
+  authToken: 'x-authorization-with',
 
   /**
    * @type {boolean} true | false

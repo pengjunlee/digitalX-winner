@@ -1,6 +1,11 @@
 <template>
   <div class="navbar">
-    <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <hamburger
+      id="hamburger-container"
+      :is-active="sidebar.opened"
+      class="hamburger-container"
+      @toggleClick="toggleSideBar"
+    />
 
     <breadcrumb id="breadcrumb-container" class="breadcrumb-container" />
 
@@ -11,45 +16,70 @@
         <error-log class="errLog-container right-menu-item hover-effect" />
 
         <screenfull id="screenfull" class="right-menu-item hover-effect" />
-
       </template>
 
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
+          <img :src="avatar" class="user-avatar" />
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown">
-          <router-link to="/profile/index">
-            <el-dropdown-item>Profile</el-dropdown-item>
-          </router-link>
-          <router-link to="/">
-            <el-dropdown-item>Dashboard</el-dropdown-item>
-          </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-element-admin/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
+          <a @click="dialogFormVisible = true">
+            <el-dropdown-item>修改密码</el-dropdown-item>
           </a>
           <el-dropdown-item divided>
-            <span style="display:block;" @click="logout">Log Out</span>
+            <span style="display:block;" @click="logout">退出登录</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+    <el-dialog title="修改密码" width="500px" :visible.sync="dialogFormVisible" >
+      <el-form :model="passwordForm" ref="passwordForm" :rules="passwordRules" label-position="center">
+        <el-form-item  prop="password" label="新密码:" :label-width="formLabelWidth"  style="text-align:left;">
+          <el-input name="password" v-model="passwordForm.password" autocomplete="off" placeholder="请输入新密码" :type="showPassword?'':'password'"></el-input>
+          <el-checkbox v-model="showPassword">显示明文</el-checkbox>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="confirmUpdatePassword">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import Breadcrumb from '@/components/Breadcrumb'
-import Hamburger from '@/components/Hamburger'
-import ErrorLog from '@/components/ErrorLog'
-import Screenfull from '@/components/Screenfull'
-import Search from '@/components/HeaderSearch'
+import { mapGetters } from "vuex";
+import Breadcrumb from "@/components/Breadcrumb";
+import Hamburger from "@/components/Hamburger";
+import ErrorLog from "@/components/ErrorLog";
+import Screenfull from "@/components/Screenfull";
+import Search from "@/components/HeaderSearch";
+import { Message } from 'element-ui'
 
 export default {
+  data() {
+    const validatePassword = (rule, value, callback) => {
+      if (value.length < 6) {
+        callback(new Error("The password can not be less than 6 digits"));
+      } else {
+        callback();
+      }
+    };
+    return {
+      showPassword:false,
+      dialogFormVisible: false,
+      passwordForm: {
+        password: ""
+      },
+      formLabelWidth: "70px",
+      passwordRules: {
+        password: [
+          { required: true, trigger: "blur", validator: validatePassword }
+        ]
+      }
+    };
+  },
   components: {
     Breadcrumb,
     Hamburger,
@@ -58,22 +88,39 @@ export default {
     Search
   },
   computed: {
-    ...mapGetters([
-      'sidebar',
-      'avatar',
-      'device'
-    ])
+    ...mapGetters(["sidebar", "avatar", "device"])
   },
   methods: {
     toggleSideBar() {
-      this.$store.dispatch('app/toggleSideBar')
+      this.$store.dispatch("app/toggleSideBar");
     },
     async logout() {
-      await this.$store.dispatch('user/logout')
+      await this.$store.dispatch("user/logout");
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    confirmUpdatePassword() {
+      this.$refs.passwordForm.validate(valid => {
+        if (valid) {
+          this.dialogFormVisible = false;
+          this.$store
+            .dispatch("user/updatePassword", this.passwordForm)
+            .then(() => {
+              Message({
+                message: '密码修改成功',
+                type: 'success',
+                duration: 2 * 1000
+              })
+            })
+            .catch(() => {
+            });
+        } else {
+          new Error("The password can not be less than 6 digits");
+          return false;
+        }
+      });
     }
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -82,18 +129,18 @@ export default {
   overflow: hidden;
   position: relative;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
   .hamburger-container {
     line-height: 46px;
     height: 100%;
     float: left;
     cursor: pointer;
-    transition: background .3s;
-    -webkit-tap-highlight-color:transparent;
+    transition: background 0.3s;
+    -webkit-tap-highlight-color: transparent;
 
     &:hover {
-      background: rgba(0, 0, 0, .025)
+      background: rgba(0, 0, 0, 0.025);
     }
   }
 
@@ -125,10 +172,10 @@ export default {
 
       &.hover-effect {
         cursor: pointer;
-        transition: background .3s;
+        transition: background 0.3s;
 
         &:hover {
-          background: rgba(0, 0, 0, .025)
+          background: rgba(0, 0, 0, 0.025);
         }
       }
     }

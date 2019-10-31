@@ -2,11 +2,11 @@ import Mock from 'mockjs'
 import { param2Obj } from '../src/utils'
 
 import user from './user'
-import search from './remote-search'
+import shop from './shop'
 
 const mocks = [
   ...user,
-  ...search
+  ...shop
 ]
 
 // for front mock

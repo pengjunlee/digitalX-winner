@@ -122,8 +122,52 @@ export const asyncRoutes = [
         meta: { title: '全棉时代官网', icon: 'link' }
       }
     ]
+  }, {
+    path: '/tmall',
+    component: Layout,
+    redirect: '/tmall/shop',
+    alwaysShow: true, // will always show the root menu
+    name: 'Tmall',
+    meta: {
+      title: '天猫数据',
+      icon: 'tmall',
+      roles: ['admin'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: 'shop',
+        component: () => import('@/views/tmall/shop'),
+        name: 'TmallShop',
+        meta: { title: '店铺', icon: 'shop', noCache: true }
+      },
+      {
+        path: 'goods/:shopId(\\d+)',
+        component: () => import('@/views/tmall/goods'),
+        name: 'TmallGoods',
+        meta: { title: '店铺宝贝', noCache: true, activeMenu: '/tmall/shop' },
+        hidden: true
+      }
+    ]
+  }, {
+    path: '/system',
+    component: Layout,
+    redirect: '/system/usermgt',
+    alwaysShow: true, // will always show the root menu
+    name: 'System',
+    meta: {
+      title: '系统管理',
+      icon: 'system_mgt',
+      roles: ['admin'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: 'usermgt',
+        component: () => import('@/views/system/user'),
+        name: 'UserMgt',
+        meta: { title: '用户管理', icon: 'user', noCache: true }
+      }
+    ]
   },
-
   {
     path: '/error',
     component: Layout,
