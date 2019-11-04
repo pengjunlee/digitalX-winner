@@ -56,6 +56,11 @@
           <span>{{ scope.row.preSaleCash }}</span>
         </template>
       </el-table-column>
+      <el-table-column width="90px" align="center" label="优惠" prop="preSaleDdiscount" sortable="custom">
+        <template slot-scope="scope">
+          <span>{{ scope.row.preSaleDiscount }}</span>
+        </template>
+      </el-table-column>
       <el-table-column
         width="110px"
         align="center"

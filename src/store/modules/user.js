@@ -1,4 +1,5 @@
-import { login, logout, getInfo, updatePassword } from '@/api/user'
+import { getUserInfo, updatePassword } from '@/api/user'
+import { login, logout } from '@/api/login'
 import { getToken, setToken, removeToken, getName, setName, removeName } from '@/utils/auth'
 import { resetRouter } from '@/router'
 
@@ -21,7 +22,6 @@ const mutations = {
   },
   SET_NAME: (state, name) => {
     setName(name)
-    console.log('setName : '+name)
     state.name = name
   },
   SET_NICKNAME: (state, nickName) => {
@@ -54,7 +54,7 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.name).then(response => {
+      getUserInfo(state.name).then(response => {
         const { data } = response
         if (!data) {
           reject('获取用户信息失败，请重新登录')
@@ -62,7 +62,7 @@ const actions = {
         const { roles, nickName, avatar, introduction } = data
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
-          reject('getInfo: roles must be a non-null array!')
+          reject('getUserInfo: roles must be a non-null array!')
         }
         commit('SET_ROLES', roles)
         commit('SET_NICKNAME', nickName)
@@ -94,8 +94,9 @@ const actions = {
 
   // update password
   updatePassword({ commit }, passwordForm) {
+    const { password } = passwordForm
     return new Promise((resolve, reject) => {
-      updatePassword(passwordForm).then(() => {
+      updatePassword({ password: password, username: state.name }).then(() => {
         resolve()
       }).catch(error => {
         reject(error)
@@ -123,7 +124,7 @@ const actions = {
       resolve()
     })
   }
-  
+
 }
 
 export default {

@@ -26,10 +26,10 @@ import * as filters from './filters' // global filters
  * please remove it before going online! ! !
  */
 
-import { mockXHR } from '../mock'
-if (process.env.NODE_ENV === 'production') {
-  mockXHR()
-}
+// import { mockXHR } from '../mock'
+// if (process.env.NODE_ENV === 'production') {
+//   mockXHR()
+// }
 
 Vue.use(Element, {
   size: 'medium' // set element-ui default size

@@ -57,9 +57,9 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="left" width="150px" label="用户">
+      <el-table-column align="center" width="150px" label="用户">
         <template slot-scope="{row}">
-          <div style="word-break: keep-all;white-space: nowrap;">
+          <div style="text-align: left;word-break: keep-all;white-space: nowrap;">
             <img style="border-radius: 50%;width: 30px;height: 30px;" :src="row.avatar" />
             <span style="line-height: 30px;vertical-align: top;">{{ row.name }}</span>
           </div>
@@ -83,7 +83,7 @@
       </el-table-column>
       <el-table-column width="160" align="center" label="最近更新" prop="updatedTime" sortable="custom">
         <template slot-scope="scope">
-          <span>{{ scope.row.updatedTime }}</span>
+          <span>{{ scope.row.updatedTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="简介" prop="introduction">
@@ -100,6 +100,13 @@
           >
             <span>编辑</span>
           </button>
+          <button
+            type="button"
+            class="el-button el-button--primary el-button--small is-plain"
+            @click="deleteData(row.id)"
+          >
+            <span>删除</span>
+          </button>
         </template>
       </el-table-column>
     </el-table>
@@ -111,20 +118,30 @@
       :limit.sync="listQuery.limit"
       @pagination="getList"
     />
-    <el-dialog :title="dialogTitle[dialogType]" :visible.sync="dialogFormVisible">
+    <el-dialog width="600px" :title="dialogTitle[dialogType]" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
         :rules="rules"
         :model="temp"
         label-position="left"
         label-width="100px"
-        style="width: 400px; margin-left:50px;"
+        style="padding:20px;"
       >
-        <el-form-item label="用户名" prop="name">
+        <el-form-item v-if="dialogType=='create'" label="用户名" prop="name">
           <el-input v-model="temp.name" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="用户昵称" prop="nickName">
           <el-input v-model="temp.nickName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="头像地址" prop="avatar">
+          <el-input v-model="temp.avatar" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="选择角色" prop="roles">
+          <el-input v-model="temp.roles" autocomplete="off" style="display:none;"></el-input>
+          <switch-items @itemChange="handleRoleChange" :items="rolesMap" :currentItem="temp.roles" />
+        </el-form-item>
+        <el-form-item label="简介" prop="introduction">
+          <el-input type="textarea" v-model="temp.introduction" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -135,14 +152,16 @@
   </div>
 </template>
 <script>
-import { userList, createUser, updateUser, getInfo } from "@/api/user";
+import { userList, deleteUser, createUser, updateUser, getUserInfo } from "@/api/user";
 import { parseTime } from "@/utils";
 import waves from "@/directive/waves"; // waves directive
 import Pagination from "@/components/Pagination"; // secondary package based on el-pagination
+import SwitchItems from "@/components/SwitchItems";
+import { MessageBox, Message } from 'element-ui'
 
 export default {
   name: "UserMgt",
-  components: { Pagination },
+  components: { Pagination, SwitchItems },
   directives: { waves },
   filters: {
     statusFilter(status) {
@@ -158,13 +177,12 @@ export default {
       if (value.length == 0) {
         callback(new Error("用户名不能为空"));
       } else {
-        getInfo(value)
+        getUserInfo(value)
           .then(response => {
-            if(response.data != null) {
-                callback(new Error("该用户名已经存在"));
-            } 
-            else {
-                callback();
+            if (response.data != null) {
+              callback(new Error("该用户名已经存在"));
+            } else {
+              callback();
             }
           })
           .catch(() => {
@@ -187,10 +205,21 @@ export default {
         locked: null,
         roles: null
       },
+      rolesMap: {
+        admin: {
+          name: "管理员",
+          value: "admin"
+        },
+        editor: {
+          name: "普通用户",
+          value: "editor"
+        }
+      },
       dialogFormVisible: false,
       temp: {
         id: undefined,
         name: "",
+        locked: "",
         nickName: "",
         avatar: "",
         introduction: "",
@@ -214,15 +243,16 @@ export default {
     this.getList();
   },
   methods: {
+    handleRoleChange(newRole) {
+      this.temp.roles = newRole;
+    },
     getList() {
       this.listLoading = true;
       userList(this.listQuery).then(response => {
         this.list = response.data.rows;
         this.total = response.data.total;
         // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false;
-        }, 1.5 * 1000);
+        this.listLoading = false;
       });
     },
     handleFilter() {
@@ -237,7 +267,7 @@ export default {
     },
     handleCreate() {
       this.resetTemp();
-      this.dialogStatus = "create";
+      this.dialogType = "create";
       this.dialogFormVisible = true;
       this.$nextTick(() => {
         this.$refs["dataForm"].clearValidate();
@@ -245,7 +275,7 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row); // copy obj
-      this.dialogStatus = "update";
+      this.dialogType = "update";
       this.dialogFormVisible = true;
       this.$nextTick(() => {
         this.$refs["dataForm"].clearValidate();
@@ -258,8 +288,25 @@ export default {
         nickName: "",
         avatar: "",
         introduction: "",
-        roles: ""
+        roles: "editor"
       };
+    },
+    deleteData(id) {
+      MessageBox.confirm('确认要删除用户吗？', '删除确认', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteUser(id).then(response =>{
+          this.$notify({
+              title: "系统通知",
+              message: "用户删除成功",
+              type: "success",
+              duration: 2000
+            });
+            this.getList();
+        })
+      })
     },
     createData() {
       this.$refs["dataForm"].validate(valid => {
@@ -274,6 +321,7 @@ export default {
               type: "success",
               duration: 2000
             });
+            this.getList();
           });
         }
       });
@@ -281,7 +329,13 @@ export default {
     updateData() {
       this.$refs["dataForm"].validate(valid => {
         if (valid) {
-          const tempData = Object.assign({}, this.temp);
+          const tempData = {};
+          tempData["id"] = this.temp.id;
+          tempData["nickName"] = this.temp.nickName;
+          tempData["roles"] = this.temp.roles;
+          tempData["avatar"] = this.temp.avatar;
+          tempData["introduction"] = this.temp.introduction;
+
           updateUser(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
@@ -297,6 +351,7 @@ export default {
               type: "success",
               duration: 2000
             });
+            this.getList();
           });
         }
       });

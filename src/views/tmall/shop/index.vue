@@ -66,17 +66,6 @@
       <el-table-column
         width="200px"
         align="center"
-        label="预售订金(万元)"
-        prop="presale_cash_total"
-        sortable="custom"
-      >
-        <template slot-scope="scope">
-          <span>{{ scope.row.presaleCashTotal }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        width="200px"
-        align="center"
         label="预售订单金额(万元)"
         prop="presale_bill_total"
         sortable="custom"

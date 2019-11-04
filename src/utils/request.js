@@ -50,7 +50,6 @@ service.interceptors.response.use(
      * -201 用户名与密码不匹配；
      */
     if (res.code !== 0) {
-      
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       if (res.code === -2 || res.code === 401) {
         // 重新登录
@@ -65,17 +64,13 @@ service.interceptors.response.use(
         })
       } else {
         Message({
-          message: res.message || '出意外了!^_^!',
+          message: res.message || '系统错误',
           type: 'error',
           duration: 3 * 1000
         })
       }
       return Promise.reject(new Error(res.message || '系统错误！'))
     } else {
-      // 开发环境下，模拟添加用户token，根据测试的角色添加
-      if (process.env.NODE_ENV === 'development') {
-        response.headers[authToken] = res.token
-      }
       store.dispatch('user/setToken', response.headers[authToken]).then(() => {
         // console.log('setToken: ' + response.headers[authToken])
       })
@@ -85,10 +80,15 @@ service.interceptors.response.use(
   error => {
     // 请求异常时打印出异常信息
     console.log(error)
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
+    // 重新登录
+    MessageBox.confirm('用户登录信息已过期，请重新登录', '重新登录', {
+      confirmButtonText: '重新登录',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      store.dispatch('user/resetToken').then(() => {
+        location.reload()
+      })
     })
     return Promise.reject(error)
   }

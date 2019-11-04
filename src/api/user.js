@@ -1,14 +1,6 @@
 import request from '@/utils/request'
 
-export function login(data) {
-  return request({
-    url: '/user/login',
-    method: 'post',
-    data
-  })
-}
-
-export function getInfo(name) {
+export function getUserInfo(name) {
   return request({
     url: '/user/info',
     method: 'get',
@@ -16,17 +8,10 @@ export function getInfo(name) {
   })
 }
 
-export function logout() {
-  return request({
-    url: '/user/logout',
-    method: 'get'
-  })
-}
-
 export function updatePassword(data) {
   return request({
-    url: '/password/update',
-    method: 'post',
+    url: '/user/password/update',
+    method: 'put',
     data
   })
 }
@@ -47,11 +32,18 @@ export function createUser(data) {
   })
 }
 
-export function updateArticle(data) {
+export function updateUser(data) {
   return request({
     url: '/user/update',
-    method: 'post',
+    method: 'put',
     data
+  })
+}
+
+export function deleteUser(id) {
+  return request({
+    url: '/user/delete/' + id,
+    method: 'delete'
   })
 }
 

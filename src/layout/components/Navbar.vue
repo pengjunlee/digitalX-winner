@@ -6,18 +6,13 @@
       class="hamburger-container"
       @toggleClick="toggleSideBar"
     />
-
     <breadcrumb id="breadcrumb-container" class="breadcrumb-container" />
-
     <div class="right-menu">
       <template v-if="device!=='mobile'">
         <search id="header-search" class="right-menu-item" />
-
         <error-log class="errLog-container right-menu-item hover-effect" />
-
         <screenfull id="screenfull" class="right-menu-item hover-effect" />
       </template>
-
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
         <div class="avatar-wrapper">
           <img :src="avatar" class="user-avatar" />
@@ -33,10 +28,26 @@
         </el-dropdown-menu>
       </el-dropdown>
     </div>
-    <el-dialog title="修改密码" width="500px" :visible.sync="dialogFormVisible" >
-      <el-form :model="passwordForm" ref="passwordForm" :rules="passwordRules" label-position="center">
-        <el-form-item  prop="password" label="新密码:" :label-width="formLabelWidth"  style="text-align:left;">
-          <el-input name="password" v-model="passwordForm.password" autocomplete="off" placeholder="请输入新密码" :type="showPassword?'':'password'"></el-input>
+    <el-dialog title="修改密码" width="500px" :visible.sync="dialogFormVisible">
+      <el-form
+        :model="passwordForm"
+        ref="passwordForm"
+        :rules="passwordRules"
+        label-position="center"
+      >
+        <el-form-item
+          prop="password"
+          label="新密码:"
+          :label-width="formLabelWidth"
+          style="text-align:left;"
+        >
+          <el-input
+            name="password"
+            v-model="passwordForm.password"
+            autocomplete="off"
+            placeholder="请输入新密码"
+            :type="showPassword?'':'password'"
+          ></el-input>
           <el-checkbox v-model="showPassword">显示明文</el-checkbox>
         </el-form-item>
       </el-form>
@@ -55,7 +66,6 @@ import Hamburger from "@/components/Hamburger";
 import ErrorLog from "@/components/ErrorLog";
 import Screenfull from "@/components/Screenfull";
 import Search from "@/components/HeaderSearch";
-import { Message } from 'element-ui'
 
 export default {
   data() {
@@ -67,7 +77,7 @@ export default {
       }
     };
     return {
-      showPassword:false,
+      showPassword: false,
       dialogFormVisible: false,
       passwordForm: {
         password: ""
@@ -96,7 +106,7 @@ export default {
     },
     async logout() {
       await this.$store.dispatch("user/logout");
-      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      this.$router.push(`/login?redirect=${this.$route.fullPath}`);
     },
     confirmUpdatePassword() {
       this.$refs.passwordForm.validate(valid => {
@@ -105,16 +115,15 @@ export default {
           this.$store
             .dispatch("user/updatePassword", this.passwordForm)
             .then(() => {
-              Message({
-                message: '密码修改成功',
-                type: 'success',
-                duration: 2 * 1000
-              })
+              this.$notify({
+                title: "系统通知",
+                message: "密码修改成功",
+                type: "success",
+                duration: 2000
+              });
             })
-            .catch(() => {
-            });
+            .catch(() => {});
         } else {
-          new Error("The password can not be less than 6 digits");
           return false;
         }
       });
