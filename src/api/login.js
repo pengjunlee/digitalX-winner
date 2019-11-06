@@ -14,3 +14,10 @@ export function logout() {
     method: 'get'
   })
 }
+
+export function verifycode() {
+  return request({
+    url: '/verifycode',
+    method: 'get'
+  })
+}

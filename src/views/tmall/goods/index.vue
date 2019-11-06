@@ -12,7 +12,9 @@
         @keyup.enter.native="handleFilter"
       />
 
-      <el-button type="primary" icon="el-icon-search" @click="handleFilter">Search</el-button>
+      <el-button type="primary" icon="el-icon-search" @click="handleFilter">搜索</el-button>
+      <el-button type="primary" icon="el-icon-sort" @click="resetFilter">重置</el-button>
+      <el-button type="primary" icon="el-icon-download" @click="downloadExcel">下载</el-button>
     </div>
     <el-table
       v-loading="listLoading"
@@ -31,7 +33,12 @@
       <el-table-column min-width="330px" label="商品名称">
         <template slot-scope="{row}">
           <div style="word-break: keep-all;white-space: nowrap;">
-            <el-image style="width: 35px; height: 35px" :src="row.imgUrl" :fit="'scale-down'"></el-image>
+            <el-image
+              style="width: 35px; height: 35px"
+              :src="row.imgUrl"
+              :fit="'scale-down'"
+              :preview-src-list="preList(row.imgUrl)"
+            ></el-image>
             <span class="goods-name">
               <a
                 :href="'https://detail.tmall.com/item.htm?id='+row.id"
@@ -56,7 +63,13 @@
           <span>{{ scope.row.preSaleCash }}</span>
         </template>
       </el-table-column>
-      <el-table-column width="90px" align="center" label="优惠" prop="preSaleDdiscount" sortable="custom">
+      <el-table-column
+        width="90px"
+        align="center"
+        label="优惠"
+        prop="preSaleDdiscount"
+        sortable="custom"
+      >
         <template slot-scope="scope">
           <span>{{ scope.row.preSaleDiscount }}</span>
         </template>
@@ -114,6 +127,7 @@
 </template>
 
 <script>
+import { param } from "@/utils";
 import { goodsList } from "@/api/shop";
 import Pagination from "@/components/Pagination"; // Secondary package based on el-pagination
 
@@ -130,6 +144,7 @@ export default {
   },
   data() {
     return {
+      downloadUrl: "",
       list: null,
       total: 0,
       listLoading: true,
@@ -144,16 +159,28 @@ export default {
       }
     };
   },
+  computed: {},
   created() {
     this.listQuery.shopId = this.$route.params && this.$route.params.shopId;
-    console.log("params:" + this.$route.params.shopId);
+    this.downloadUrl = process.env.VUE_APP_BASE_API + "/download/goods?";
     this.getData();
   },
   methods: {
+    resetFilter() {
+      this.listQuery.name = null
+      this.listQuery.preSale = null
+    },
+    downloadExcel() {
+      let a = document.createElement("a");
+      a.href = this.downloadUrl + param(this.listQuery);
+      a.click();
+    },
+    preList(url) {
+      return new Array(url);
+    },
     getData() {
       this.listLoading = true;
       goodsList(this.listQuery).then(response => {
-        console.log(response.data.rows);
         this.list = response.data.rows;
         this.total = response.data.total;
         this.listLoading = false;

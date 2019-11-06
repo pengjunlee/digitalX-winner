@@ -15,26 +15,3 @@ export function goodsList(query) {
     params: query
   })
 }
-
-export function updateShop(query) {
-  return request({
-    url: '/tmall/shop/update/' + query.shopId,
-    method: 'get'
-  })
-}
-
-export function createArticle(data) {
-  return request({
-    url: '/article/create',
-    method: 'post',
-    data
-  })
-}
-
-export function updateArticle(data) {
-  return request({
-    url: '/article/update',
-    method: 'post',
-    data
-  })
-}

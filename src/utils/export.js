@@ -80,10 +80,15 @@ service.interceptors.response.use(
   error => {
     // 请求异常时打印出异常信息
     console.log(error)
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
+    // 重新登录
+    MessageBox.confirm('用户登录信息已过期，请重新登录', '重新登录', {
+      confirmButtonText: '重新登录',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      store.dispatch('user/resetToken').then(() => {
+        location.reload()
+      })
     })
     return Promise.reject(error)
   }

@@ -112,6 +112,7 @@
     </el-table>
 
     <pagination
+      style="text-align:right;"
       v-show="total>0"
       :total="total"
       :page.sync="listQuery.page"
@@ -152,12 +153,18 @@
   </div>
 </template>
 <script>
-import { userList, deleteUser, createUser, updateUser, getUserInfo } from "@/api/user";
+import {
+  userList,
+  deleteUser,
+  createUser,
+  updateUser,
+  getUserInfo
+} from "@/api/user";
 import { parseTime } from "@/utils";
 import waves from "@/directive/waves"; // waves directive
 import Pagination from "@/components/Pagination"; // secondary package based on el-pagination
 import SwitchItems from "@/components/SwitchItems";
-import { MessageBox, Message } from 'element-ui'
+import { MessageBox, Message } from "element-ui";
 
 export default {
   name: "UserMgt",
@@ -210,9 +217,9 @@ export default {
           name: "管理员",
           value: "admin"
         },
-        editor: {
+        guest: {
           name: "普通用户",
-          value: "editor"
+          value: "guest"
         }
       },
       dialogFormVisible: false,
@@ -286,27 +293,27 @@ export default {
         id: undefined,
         name: "",
         nickName: "",
-        avatar: "",
-        introduction: "",
-        roles: "editor"
+        avatar: "http://pic.ik123.com/uploads/allimg/151130/3-151130115125.gif",
+        introduction: "这家伙太懒了，未添加任何描述",
+        roles: "guest"
       };
     },
     deleteData(id) {
-      MessageBox.confirm('确认要删除用户吗？', '删除确认', {
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
-        type: 'warning'
+      MessageBox.confirm("确认要删除用户吗？", "删除确认", {
+        confirmButtonText: "删除",
+        cancelButtonText: "取消",
+        type: "warning"
       }).then(() => {
-        deleteUser(id).then(response =>{
+        deleteUser(id).then(response => {
           this.$notify({
-              title: "系统通知",
-              message: "用户删除成功",
-              type: "success",
-              duration: 2000
-            });
-            this.getList();
-        })
-      })
+            title: "系统通知",
+            message: "用户删除成功",
+            type: "success",
+            duration: 2000
+          });
+          this.getList();
+        });
+      });
     },
     createData() {
       this.$refs["dataForm"].validate(valid => {

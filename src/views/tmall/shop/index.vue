@@ -94,15 +94,7 @@
               <span>宝贝</span>
             </button>
           </router-link>
-          <button
-            type="button"
-            class="el-button el-button--primary el-button--small is-plain"
-            @click="refreshShop(scope.row.id)"
-          >
-            <!---->
-            <i class="el-icon-refresh"></i>
-            <span>刷新</span>
-          </button>
+          
         </template>
       </el-table-column>
     </el-table>
@@ -120,7 +112,7 @@
 </template>
 
 <script>
-import { shopList, updateShop } from "@/api/shop";
+import { shopList } from "@/api/shop";
 import Pagination from "@/components/Pagination"; // Secondary package based on el-pagination
 
 export default {
@@ -151,14 +143,6 @@ export default {
         this.list = response.data.rows;
         this.total = response.data.total;
         this.listLoading = false;
-      });
-    },
-    refreshShop(shopId) {
-      console.log(shopId);
-      this.listLoading = true;
-      updateShop({ shopId: shopId }).then(response => {
-        this.listLoading = false;
-        this.getList();
       });
     },
     sortChange(data) {

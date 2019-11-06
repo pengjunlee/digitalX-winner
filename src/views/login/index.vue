@@ -18,7 +18,7 @@
       clickMode="push"
     ></vue-particles>
     <div class="login-wrap">
-        <el-form
+      <el-form
         ref="loginForm"
         :model="loginForm"
         :rules="loginRules"
@@ -26,84 +26,125 @@
         autocomplete="on"
         label-position="left"
       >
-      <div class="form">
-        <div class="title-container">
-          <h3 class="title">情报中心数据管理平台</h3>
-        </div>
+        <div class="form">
+          <div class="title-container">
+            <h3 class="title">情报中心数据管理平台</h3>
+          </div>
 
-        <el-form-item prop="username">
-          <span class="svg-container">
-            <svg-icon icon-class="user" />
-          </span>
-          <el-input
-            ref="username"
-            v-model="loginForm.username"
-            placeholder="Username"
-            name="username"
-            type="text"
-            tabindex="1"
-            autocomplete="on"
-          />
-        </el-form-item>
-
-        <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
-          <el-form-item prop="password">
+          <el-form-item prop="username">
             <span class="svg-container">
-              <svg-icon icon-class="password" />
+              <svg-icon icon-class="user" />
             </span>
             <el-input
-              :key="passwordType"
-              ref="password"
-              v-model="loginForm.password"
-              :type="passwordType"
-              placeholder="Password"
-              name="password"
-              tabindex="2"
+              ref="username"
+              v-model="loginForm.username"
+              placeholder="登录账号"
+              name="username"
+              type="text"
+              tabindex="1"
               autocomplete="on"
-              @keyup.native="checkCapslock"
-              @blur="capsTooltip = false"
-              @keyup.enter.native="handleLogin"
             />
-            <span class="show-pwd" @click="showPwd">
-              <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
-            </span>
           </el-form-item>
-        </el-tooltip>
 
-        <el-button
-          :loading="loading"
-          type="primary"
-          style="width:100%;margin-bottom:30px;"
-          @click.native.prevent="handleLogin"
-        >立即登录</el-button>
-      </div>
+          <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
+            <el-form-item prop="password">
+              <span class="svg-container">
+                <svg-icon icon-class="password" />
+              </span>
+              <el-input
+                :key="passwordType"
+                ref="password"
+                v-model="loginForm.password"
+                :type="passwordType"
+                placeholder="密码"
+                name="password"
+                tabindex="2"
+                autocomplete="on"
+                @keyup.native="checkCapslock"
+                @blur="capsTooltip = false"
+                @keyup.enter.native="handleLogin"
+              />
+              <span class="show-pwd" @click="showPwd">
+                <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+              </span>
+            </el-form-item>
+          </el-tooltip>
+          <div>
+            <el-form-item prop="verifycode" style="width:370px;display: inline-block;">
+              <span class="svg-container">
+                <svg-icon icon-class="verifycode" />
+              </span>
+              <el-input
+                ref="verifycode"
+                v-model="loginForm.verifycode"
+                placeholder="验证码"
+                name="verifycode"
+                type="text"
+                tabindex="1"
+                autocomplete="on"
+              />
+            </el-form-item>
+            <img
+              id="verifyimg"
+              style="float:right;width:100px;height:50px;padding:5px 10px;"
+              @click="getVerifycode"
+            />
+          </div>
+
+          <el-button
+            :loading="loading"
+            type="primary"
+            style="width:100%;margin-bottom:30px;"
+            @click.native.prevent="handleLogin"
+          >立即登录</el-button>
+        </div>
       </el-form>
     </div>
   </div>
 </template>
 
 <script>
+import { verifycode } from "@/api/login";
+
 export default {
   name: "Login",
   data() {
     const validateUsername = (rule, value, callback) => {
       if (value.length == 0) {
-        callback(new Error("Please enter the correct user name"));
+        callback(new Error("请输入登录账号"));
+      } else if (value.length > 20) {
+        callback(new Error("登录账号格式不正确"));
       } else {
         callback();
       }
     };
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error("The password can not be less than 6 digits"));
+      if (value.length == 0) {
+        callback(new Error("请输入密码"));
+      } else if (value.length > 30) {
+        callback(new Error("密码格式不正确"));
       } else {
         callback();
+      }
+    };
+    const validateVerifycode = (rule, value, callback) => {
+      if (value.length == 0) {
+        callback(new Error("请输入验证码"));
+      } else if (value.length !=4) {
+        callback(new Error("验证码格式不正确"));
+      } else {
+        if (value.toLowerCase() != this.verifycode.toLowerCase()) {
+          callback(new Error("验证码不正确"));
+        } else {
+          callback();
+        }
       }
     };
     return {
       loginForm: {
         username: "admin",
-        password: "111111"
+        password: "111111",
+        verifycode: ""
       },
       loginRules: {
         username: [
@@ -111,8 +152,12 @@ export default {
         ],
         password: [
           { required: true, trigger: "blur", validator: validatePassword }
+        ],
+        verifycode: [
+          { required: true, trigger: "blur", validator: validateVerifycode }
         ]
       },
+      verifycode: "",
       passwordType: "password",
       capsTooltip: false,
       loading: false,
@@ -132,7 +177,9 @@ export default {
       immediate: true
     }
   },
-  created() {},
+  created() {
+    this.getVerifycode();
+  },
   mounted() {
     if (this.loginForm.username === "") {
       this.$refs.username.focus();
@@ -141,6 +188,7 @@ export default {
     }
   },
   destroyed() {},
+  computed: {},
   methods: {
     checkCapslock({ shiftKey, key } = {}) {
       if (key && key.length === 1) {
@@ -196,6 +244,15 @@ export default {
         }
         return acc;
       }, {});
+    },
+    getVerifycode() {
+      verifycode().then(response => {
+        console.log(response.data);
+        if (response.data) {
+          document.getElementById("verifyimg").src = response.data.baseImg;
+          this.verifycode = response.data.code;
+        }
+      });
     }
   }
 };

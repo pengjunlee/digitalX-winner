@@ -51,25 +51,15 @@ export const constantRoutes = [
     hidden: true
   },
   {
-    path: '/404',
-    component: () => import('@/views/error-page/404'),
-    hidden: true
-  },
-  {
-    path: '/401',
-    component: () => import('@/views/error-page/401'),
-    hidden: true
-  },
-  {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/home',
     children: [
       {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index'),
-        name: 'Dashboard',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
+        path: 'home',
+        component: () => import('@/views/home/index'),
+        name: 'Home',
+        meta: { title: '首页', icon: 'home', affix: true }
       }
     ]
   },
@@ -82,7 +72,7 @@ export const constantRoutes = [
         path: 'index',
         component: () => import('@/views/guide/index'),
         name: 'Guide',
-        meta: { title: '操作指南', icon: 'guide', noCache: true }
+        meta: { title: '操作向导', icon: 'guide', noCache: true }
       }
     ]
   }
@@ -116,10 +106,6 @@ export const asyncRoutes = [
         component: () => import('@/views/clipboard/index'),
         name: 'Clipboard',
         meta: { title: '剪切板', icon: 'clipboard' }
-      },
-      {
-        path: 'https://www.purcotton.com/',
-        meta: { title: '全棉时代官网', icon: 'link' }
       }
     ]
   }, {
@@ -130,21 +116,40 @@ export const asyncRoutes = [
     name: 'Tmall',
     meta: {
       title: '天猫数据',
-      icon: 'tmall',
-      roles: ['admin'] // you can set roles in root nav
+      icon: 'tmall'
     },
     children: [
       {
         path: 'shop',
         component: () => import('@/views/tmall/shop'),
         name: 'TmallShop',
-        meta: { title: '店铺', icon: 'shop', noCache: true }
+        meta: { title: '竞品店铺', icon: 'shop', noCache: true }
+      },
+      {
+        path: 'comment/index',
+        component: () => import('@/views/tmall/comment'),
+        name: 'CommentGoods',
+        meta: { title: '评论分析', icon: 'comment', noCache: true }
       },
       {
         path: 'goods/:shopId(\\d+)',
         component: () => import('@/views/tmall/goods'),
         name: 'TmallGoods',
         meta: { title: '店铺宝贝', noCache: true, activeMenu: '/tmall/shop' },
+        hidden: true
+      },
+      {
+        path: 'comment/:goodsId(\\d+)',
+        component: () => import('@/views/tmall/comment/CommentDetail'),
+        name: 'CommentDetail',
+        meta: { title: '评论列表', noCache: true, activeMenu: '/tmall/comment/index' },
+        hidden: true
+      },
+      {
+        path: 'comment/words/:goodsId(\\d+)',
+        component: () => import('@/views/tmall/comment/CommentWords'),
+        name: 'CommentWords',
+        meta: { title: '分词统计', noCache: true, activeMenu: '/tmall/comment/index' },
         hidden: true
       }
     ]
@@ -193,20 +198,29 @@ export const asyncRoutes = [
       }
     ]
   },
-
   {
     path: '/theme',
     component: Layout,
+    name: 'Theme',
+    meta: {
+      title: '个性设置',
+      icon: 'settings',
+      roles: ['admin'] // you can set roles in root nav
+    },
     children: [
       {
         path: 'index',
         component: () => import('@/views/theme/index'),
-        name: 'Theme',
+        name: 'ThemeIndex',
         meta: { title: '换肤', icon: 'theme' }
       }
     ]
   },
+  {
+    path: 'https://purcotton.tmall.com/shop/view_shop.htm',
+    meta: { title: '全棉天猫旗舰店', icon: 'link' }
+  },
 
   // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  { path: '*', redirect: '/error/404', hidden: true }
 ]

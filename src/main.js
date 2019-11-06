@@ -3,6 +3,14 @@ import VueParticles from 'vue-particles'
 Vue.use(VueParticles)
 import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 
+import Viewer from 'v-viewer'
+import 'viewerjs/dist/viewer.css'
+
+Vue.use(Viewer)
+Viewer.setDefaults({
+  Options: { 'inline': true, 'button': true, 'navbar': true, 'title': true, 'toolbar': true, 'tooltip': true, 'movable': true, 'zoomable': true, 'rotatable': true, 'scalable': true, 'transition': true, 'fullscreen': true, 'keyboard': true, 'url': 'data-source' }
+})
+
 import Element from 'element-ui'
 import './styles/element-variables.scss'
 
