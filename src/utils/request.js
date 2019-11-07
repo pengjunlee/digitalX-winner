@@ -37,23 +37,25 @@ service.interceptors.request.use(
 
 // 响应拦截器
 service.interceptors.response.use(
-
   response => {
     // 如果需要获取响应的Http状态码或者header信息，请直接返回response
     const res = response.data
-    console.log(res)
     /**
      * 自定义状态码：
      * 0 表示成功获取到响应；
      * -1 表示通用获取响应失败；
      * -2 表示由于鉴权引起的响应失败；
-     * -201 用户名与密码不匹配；
      */
-    if (res.code !== 0) {
+    if (res.code === 0) {
+      store.dispatch('user/setToken', response.headers[authToken]).then(() => {
+        // console.log('setToken: ' + response.headers[authToken])
+      })
+      return res
+    } else {
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === -2 || res.code === 401) {
-        // 重新登录
-        MessageBox.confirm('获取用户信息失败，请重新登录', '重新登录', {
+      if (res.code === -2) {
+        // 由于鉴权引起的响应失败，需重新登录
+        MessageBox.confirm('用户登录信息已失效，请重新登录', '重新登录', {
           confirmButtonText: '重新登录',
           cancelButtonText: '取消',
           type: 'warning'
@@ -64,17 +66,12 @@ service.interceptors.response.use(
         })
       } else {
         Message({
-          message: res.message || '系统错误',
+          message: res.message || '服务器繁忙，请稍后重试！',
           type: 'error',
           duration: 3 * 1000
         })
       }
-      return Promise.reject(new Error(res.message || '系统错误！'))
-    } else {
-      store.dispatch('user/setToken', response.headers[authToken]).then(() => {
-        // console.log('setToken: ' + response.headers[authToken])
-      })
-      return res
+      return Promise.reject(new Error(res.message || '服务器繁忙，请稍后重试！'))
     }
   },
   error => {

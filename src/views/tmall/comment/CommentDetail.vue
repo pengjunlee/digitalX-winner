@@ -20,7 +20,7 @@
         <td style="width:100%;min-width:300px;border-bottom: 1px solid gray;">
           <div class="first-comment">
             <div>
-              <div style="color:gray;margin-bottom:10px;">初次评价 {{comment.rateDate}}</div>
+              <div style="color:gray;margin-bottom:10px;">初次评价 {{comment.rateDate | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</div>
             </div>
             <div>{{comment.rateContent}}</div>
             <div v-if="comment.pics.length>0">
@@ -55,7 +55,7 @@
       </tr>
     </table>
     <pagination
-      style="text-align:right;"
+    style="text-align:right;"
       v-show="total>0"
       :total="total"
       :page.sync="listQuery.page"
@@ -84,8 +84,6 @@ export default {
         goodsId: null,
         page: 1,
         limit: 20,
-        sortBy: "id",
-        sortOrder: "ASC", // ASC or DESC
         appendComment: null,
         content:null
       }
@@ -94,7 +92,7 @@ export default {
   computed: {},
   created() {
     this.listQuery.goodsId = this.$route.params && this.$route.params.goodsId;
-    console.log(this.$route.params.goodsId)
+    
     this.getData();
   },
   methods: {
@@ -105,6 +103,7 @@ export default {
     getData() {
       this.listLoading = true;
       commentList(this.listQuery).then(response => {
+        console.log(response)
         this.list = response.data.rows;
         this.total = response.data.total;
         this.listLoading = false;

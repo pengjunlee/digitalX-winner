@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <div id="words-container" style="position: absolute;bottom: 0px;top: 0px;left:0px;right:0px;"></div>
+    <div id="words-container" style="position: absolute;bottom: 0;top: 0;left:0;right:0;"></div>
   </div>
 </template>
 
@@ -24,6 +24,12 @@ export default {
     this.getData();
   },
   methods: {
+    refresh() {
+      const { fullPath } = this.$route;
+      this.$router.replace({
+        path: "/redirect" + fullPath
+      });
+    },
     getData() {
       this.listLoading = true;
       wordsList(this.goodsId).then(response => {
@@ -59,11 +65,34 @@ export default {
             text: "词云图"
           }
         });
+        
       });
     }
   }
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.app-container {
+  /* 50= navbar  50  */
+  min-height: calc(100vh - 50px);
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.fixed-header+.app-container {
+  padding-top: 50px;
+}
+
+.hasTagsView {
+  .app-container {
+    /* 84 = navbar + tags-view = 50 + 34 */
+    min-height: calc(100vh - 84px);
+  }
+
+  .fixed-header+.app-container {
+    padding-top: 84px;
+  }
+}
 </style>
